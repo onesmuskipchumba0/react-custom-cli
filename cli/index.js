@@ -1,78 +1,51 @@
 #!/usr/bin/env node
+import inquirer from 'inquirer';
+import fs from 'fs';
+import { execSync } from 'child_process';
 
-const path = require('path');
-const fs = require('fs');
-const { execSync } = require('child_process');
-const inquirer = require('inquirer');
-const chalk = require('chalk');
-
-// Resolve paths dynamically
-const templatesDir = path.resolve(__dirname, 'templates');
-
-async function main() {
-  console.log(chalk.green('Welcome to Create-Custom CLI! 🚀'));
-
-  const { framework } = await inquirer.prompt([
+// Prompt the user for the project type and name
+const main = async () => {
+  const { projectType, projectName } = await inquirer.prompt([
     {
       type: 'list',
-      name: 'framework',
-      message: 'Select a project template:',
-      choices: [
-        'React (Vite)',
-        'React Native (Expo)',
-        'Next.js',
-        'Custom Template (pre-downloaded)',
-      ],
+      name: 'projectType',
+      message: 'Choose a project type:',
+      choices: ['React Vite (Tailwind)', 'React Native (Expo)', 'Next.js (Tailwind)'],
+    },
+    {
+      type: 'input',
+      name: 'projectName',
+      message: 'Enter your project name:',
+      default: 'my-project',
+      validate: (input) => input.trim() ? true : 'Project name cannot be empty',
     },
   ]);
 
-  switch (framework) {
-    case 'React (Vite)':
-      console.log(chalk.blue('Creating React (Vite) project...'));
-      execSync('npm create vite@latest', { stdio: 'inherit' });
-      break;
+  // Define template paths
+  const templates = {
+    'React Vite (Tailwind)': './templates/vite-tailwind-template',
+    'React Native (Expo)': './templates/react-native-expo-template',
+    'Next.js (Tailwind)': './templates/nextjs-tailwind-template',
+  };
 
-    case 'React Native (Expo)':
-      console.log(chalk.blue('Creating React Native (Expo) project...'));
-      execSync('npx create-expo-app my-app', { stdio: 'inherit' });
-      break;
+  // Get the selected template path
+  const templatePath = templates[projectType];
 
-    case 'Next.js':
-      console.log(chalk.blue('Creating Next.js project...'));
-      execSync('npx create-next-app@latest', { stdio: 'inherit' });
-      break;
-
-    case 'Custom Template (pre-downloaded)':
-      const templates = fs.readdirSync(templatesDir);
-      if (!templates.length) {
-        console.log(chalk.red('No templates found in the "templates" folder.'));
-        return;
-      }
-
-      const { template } = await inquirer.prompt([
-        {
-          type: 'list',
-          name: 'template',
-          message: 'Choose a template:',
-          choices: templates,
-        },
-      ]);
-
-      const sourcePath = path.join(templatesDir, template);
-      const destPath = path.join(process.cwd(), template);
-
-      console.log(chalk.blue(`Copying template "${template}" to current directory...`));
-      fs.cpSync(sourcePath, destPath, { recursive: true });
-      console.log(chalk.green('Template copied successfully!'));
-      break;
-
-    default:
-      console.log(chalk.red('Invalid option selected.'));
-      break;
+  if (!fs.existsSync(templatePath)) {
+    console.error('Template not found!');
+    process.exit(1);
   }
-}
 
-main().catch((err) => {
-  console.error(chalk.red('Error:', err.message));
-  process.exit(1);
+  // Destination folder for the new project
+  const destinationPath = `./${projectName}`;
+
+  // Copy the template to the new folder
+  fs.cpSync(templatePath, destinationPath, { recursive: true });
+
+  console.log(`Project ${projectName} created successfully!`);
+  console.log(`Navigate to ${projectName} and start coding.`);
+};
+
+main().catch((error) => {
+  console.error('An error occurred:', error);
 });
