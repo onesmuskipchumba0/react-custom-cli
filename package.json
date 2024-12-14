@@ -1,18 +1,25 @@
 {
   "name": "create-custom",
   "version": "1.0.0",
-  "type":"module",
+  "type": "module",
   "description": "Custom CLI for project creation with preconfigured templates",
   "main": "cli/index.js",
   "bin": {
     "create-custom": "cli/index.js"
   },
   "scripts": {},
-  "keywords": ["cli", "vite", "expo", "nextjs"],
+  "keywords": [
+    "cli",
+    "vite",
+    "expo",
+    "nextjs"
+  ],
   "author": "Onesmus Bett",
   "license": "MIT",
   "dependencies": {
-    "inquirer": "^9.1.5",
-    "chalk": "^5.0.1"
+    "chalk": "^5.0.1",
+    "figlet": "^1.8.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^9.1.5"
   }
 }
