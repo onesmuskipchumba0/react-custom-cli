@@ -5,6 +5,11 @@ import path from 'path';
 import chalk from 'chalk';
 import figlet from 'figlet';
 import { execSync } from 'child_process';
+import ora from 'ora';
+import { fileURLToPath } from 'url';
+
+// Resolve __dirname in ES modules
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ASCII Art Header Function
 function displayHeader() {
@@ -19,20 +24,10 @@ function displayHeader() {
       })
     )
   );
-  console.log(
-    chalk.cyan('🚀 Instant Project Template Generator 🚀\n')
-  );
-}
-
-// Spinner for loading effect
-function createSpinner(text) {
-  const spinner = {
-    frames: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
-    spin(index) {
-      process.stdout.write(`\r${this.frames[index % this.frames.length]} ${text}`);
-    }
-  };
-  return spinner;
+  console.log(chalk.cyan('🚀 Instant Project Template Generator 🚀\n'));
+  console.log(chalk.gray('Created by Onesmus Bett'));
+  console.log(chalk.gray('GitHub: onesmuskipchumba0'));
+  console.log(chalk.gray('Email: onesmuskipchumba5@gmail.com\n'));
 }
 
 // Main CLI Function
@@ -41,12 +36,12 @@ const main = async () => {
   console.clear();
   displayHeader();
 
-  // Project Type Selection with Emojis and Descriptions
-  const { projectType, projectName } = await inquirer.prompt([
+  // Add an exit option to the project type selection
+  const { projectType } = await inquirer.prompt([
     {
       type: 'list',
       name: 'projectType',
-      message: chalk.yellow('Choose a project type:'),
+      message: chalk.yellow('Choose a project type or exit:'),
       choices: [
         {
           name: `🚀 React Vite (Tailwind) ${chalk.dim('- Fast modern React setup')}`,
@@ -59,25 +54,39 @@ const main = async () => {
         {
           name: `🌐 Next.js (Tailwind) ${chalk.dim('- Server-side rendering')}`,
           value: 'Next.js (Tailwind)'
+        },
+        new inquirer.Separator(),
+        {
+          name: `🚪 Exit ${chalk.dim('- Close the application')}`,
+          value: 'exit'
         }
       ],
-    },
+    }
+  ]);
+
+  // Exit option handling
+  if (projectType === 'exit') {
+    console.log(chalk.yellow('👋 Exiting project generator. Goodbye!'));
+    process.exit(0);
+  }
+
+  // Project Name Input
+  const { projectName } = await inquirer.prompt([
     {
       type: 'input',
       name: 'projectName',
       message: chalk.green('Enter your project name:'),
       default: 'my-awesome-project',
       validate: (input) => {
-        // Validate project name (no special characters, spaces)
         const validNameRegex = /^[a-z0-9-_]+$/i;
-        return validNameRegex.test(input) 
-          ? true 
+        return validNameRegex.test(input)
+          ? true
           : chalk.red('Project name can only contain letters, numbers, hyphens, and underscores');
       },
-    },
+    }
   ]);
 
-  // Define template paths with more robust resolution
+  // Define template paths
   const templates = {
     'React Vite (Tailwind)': path.resolve(__dirname, 'templates/vite-tailwind-template'),
     'React Native (Expo)': path.resolve(__dirname, 'templates/react-native-expo-template'),
@@ -87,10 +96,10 @@ const main = async () => {
   // Get the selected template path
   const templatePath = templates[projectType];
 
-  // Enhanced error handling with colorful messages
+  // Error handling for missing template
   if (!fs.existsSync(templatePath)) {
     console.error(
-      chalk.red('❌ Error: ') + 
+      chalk.red('❌ Error: ') +
       chalk.yellow(`Template for ${projectType} not found!`)
     );
     process.exit(1);
@@ -99,64 +108,89 @@ const main = async () => {
   // Destination folder for the new project
   const destinationPath = path.resolve(process.cwd(), projectName);
 
-  // Loading spinner
-  const copySpinner = createSpinner('Copying project template...');
-  let spinnerIndex = 0;
-  const spinnerInterval = setInterval(() => {
-    copySpinner.spin(spinnerIndex++);
-  }, 100);
-
-  try {
-    // Copy template with enhanced fs-extra
-    await fs.copy(templatePath, destinationPath, { 
-      overwrite: false,
-      errorOnExist: true 
-    });
-
-    // Clear spinner
-    clearInterval(spinnerInterval);
-    process.stdout.write('\r');
-
-    // Success message with decorations
-    console.log(chalk.green('✅ Project created successfully!'));
-    console.log(chalk.blueBright(`📂 Project: ${projectName}`));
-    console.log(chalk.cyan(`🗂️  Location: ${destinationPath}`));
-
-    // Optional: Auto-install dependencies
-    const { installDeps } = await inquirer.prompt([
+  // Handle folder existence
+  if (fs.existsSync(destinationPath)) {
+    const { overwrite } = await inquirer.prompt([
       {
         type: 'confirm',
-        name: 'installDeps',
-        message: chalk.yellow('Would you like to install dependencies now?'),
-        default: true
+        name: 'overwrite',
+        message: chalk.red(`The folder "${projectName}" already exists. Overwrite it?`),
+        default: false
       }
     ]);
-
-    if (installDeps) {
-      console.log(chalk.blue('📦 Installing dependencies...'));
-      process.chdir(destinationPath);
-      execSync('npm install', { stdio: 'inherit' });
-      console.log(chalk.green('✅ Dependencies installed successfully!'));
+    if (!overwrite) {
+      console.log(chalk.yellow('⚠️ Operation cancelled.'));
+      process.exit(0);
+    } else {
+      await fs.remove(destinationPath); // Clear the existing folder
     }
+  }
 
-    // Final instructions
-    console.log('\n' + chalk.magenta('🎉 Happy Coding! 🎉'));
-    console.log(chalk.gray(`To get started:\n  cd ${projectName}\n  npm run dev`));
-
+  // Copy template with spinner
+  const spinner = ora('Copying project template...').start();
+  try {
+    await fs.copy(templatePath, destinationPath);
+    spinner.succeed('Project template copied successfully!');
   } catch (error) {
-    // Enhanced error handling
-    clearInterval(spinnerInterval);
-    console.error(
-      chalk.red('❌ Error creating project: ') + 
-      chalk.yellow(error.message)
-    );
+    spinner.fail('Failed to copy project template.');
+    console.error(chalk.red('❌ Error:'), error.message);
     process.exit(1);
   }
+
+  // Git initialization
+  try {
+    process.chdir(destinationPath);
+    execSync('git init && git add . && git commit -m "Initial commit"', { stdio: 'inherit' });
+    console.log(chalk.green('✅ Git repository initialized!'));
+  } catch (error) {
+    console.warn(chalk.yellow('⚠️ Git initialization failed. You can do this manually.'));
+  }
+
+  // Auto-install dependencies
+  const { installDeps } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'installDeps',
+      message: chalk.yellow('Would you like to install dependencies now?'),
+      default: true
+    }
+  ]);
+
+  if (installDeps) {
+    try {
+      console.log(chalk.blue('📦 Installing dependencies...'));
+      execSync('npm install', { stdio: 'inherit' });
+      console.log(chalk.green('✅ Dependencies installed successfully!'));
+    } catch (error) {
+      console.warn(chalk.red('❌ Dependency installation failed:'), error.message);
+    }
+  }
+
+  // Add option to open in code editor
+  const { openEditor } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'openEditor',
+      message: chalk.yellow('Would you like to open the project in your default code editor?'),
+      default: true
+    }
+  ]);
+
+  if (openEditor) {
+    try {
+      execSync(`code ${destinationPath}`, { stdio: 'inherit' });
+      console.log(chalk.green('✅ Project opened in the code editor!'));
+    } catch (error) {
+      console.warn(chalk.yellow('⚠️ Could not open the project in the editor. Make sure VS Code is installed.'));
+    }
+  }
+
+  // Final instructions
+  console.log('\n' + chalk.magenta('🎉 Project setup complete! 🎉'));
+  console.log(chalk.gray(`To get started:\n  cd ${projectName}\n  npm run dev`));
 };
 
 // Run the main function
 main().catch((error) => {
-  console.error(chalk.red('🔥 Unexpected error:'), error);
+  console.error(chalk.red('🔥 Unexpected error:'), error.stack);
 });
-
-export default main;
