@@ -58,7 +58,7 @@ const main = async () => {
         {
           name: `🌐 Next.js (Tailwind) ${chalk.dim('- Server-side rendering')}`,
           value: 'Next.js (Tailwind)'
-        }
+        },
         new inquirer.Separator(),
         {
           name: `🚪 Exit ${chalk.dim('- Close the application')}`,
