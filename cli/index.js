@@ -44,8 +44,12 @@ const main = async () => {
       message: chalk.yellow('Choose a project type or exit:'),
       choices: [
         {
-          name: `🚀 React Vite (Tailwind) ${chalk.dim('- Fast modern React setup')}`,
+          name: `🚀 React Vite (Tailwind) ${chalk.dim('- Fast modern React setup with Javascript')}`,
           value: 'React Vite (Tailwind)'
+        },
+        {
+          name: `🤖 React Vite (Tailwind & Typescript) ${chalk.dim('- Fast modern React setup with Typescript')}`,
+          value: 'React Vite (Tailwind & Typescript)'
         },
         {
           name: `📱 React Native (Expo) ${chalk.dim('- Cross-platform mobile development')}`,
@@ -54,11 +58,7 @@ const main = async () => {
         {
           name: `🌐 Next.js (Tailwind) ${chalk.dim('- Server-side rendering')}`,
           value: 'Next.js (Tailwind)'
-        },
-        {
-          name: `🌐 Next.js (Tailwind & Typescript) ${chalk.dim('- Server-side rendering')}`,
-          value: 'Next.js (Tailwind & Typescript)'
-        },
+        }
         new inquirer.Separator(),
         {
           name: `🚪 Exit ${chalk.dim('- Close the application')}`,
@@ -93,9 +93,9 @@ const main = async () => {
   // Define template paths
   const templates = {
     'React Vite (Tailwind)': path.resolve(__dirname, 'templates/vite-tailwind-template'),
+    'React Vite (Tailwind & Typescript)': path.resolve(__dirname, 'templates/vite-tailwind-template-ts'),
     'React Native (Expo)': path.resolve(__dirname, 'templates/react-native-expo-template'),
     'Next.js (Tailwind)': path.resolve(__dirname, 'templates/nextjs-tailwind-template'),
-    'Next.js (Tailwind & Typescript)': path.resolve(__dirname, 'templates/nextjs-tailwind-template-ts'),
   };
 
   // Get the selected template path
