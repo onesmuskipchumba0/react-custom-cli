@@ -100,7 +100,7 @@ const main = async () => {
     'React Vite (Tailwind & Typescript)': path.resolve(__dirname, 'templates/vite-tailwind-template-ts'),
     'React Native (Expo)': path.resolve(__dirname, 'templates/react-native-expo-template'),
     'Next.js (Tailwind) Javascript': path.resolve(__dirname, 'templates/nextjs-tailwind-template'),
-    'Next.js (Tailwind) Typescript': path.resolve(__dirname, 'templates/nextjs-js-template-ts'),
+    'Next.js (Tailwind) Typescript': path.resolve(__dirname, 'templates/next-js-template-ts'),
   };
 
   // Get the selected template path
