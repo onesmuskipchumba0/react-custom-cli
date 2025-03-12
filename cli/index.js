@@ -56,8 +56,12 @@ const main = async () => {
           value: 'React Native (Expo)'
         },
         {
-          name: `🌐 Next.js (Tailwind) ${chalk.dim('- Server-side rendering')}`,
-          value: 'Next.js (Tailwind)'
+          name: `🌐 Next.js (Tailwind) Javascript ${chalk.dim('- Server-side rendering')}`,
+          value: 'Next.js (Tailwind) Javascript'
+        },
+        {
+          name: `🌐 Next.js (Tailwind) Typescript ${chalk.dim('- Server-side rendering')}`,
+          value: 'Next.js (Tailwind) Typescript'
         },
         new inquirer.Separator(),
         {
@@ -95,7 +99,8 @@ const main = async () => {
     'React Vite (Tailwind)': path.resolve(__dirname, 'templates/vite-tailwind-template'),
     'React Vite (Tailwind & Typescript)': path.resolve(__dirname, 'templates/vite-tailwind-template-ts'),
     'React Native (Expo)': path.resolve(__dirname, 'templates/react-native-expo-template'),
-    'Next.js (Tailwind)': path.resolve(__dirname, 'templates/nextjs-tailwind-template'),
+    'Next.js (Tailwind) Javascript': path.resolve(__dirname, 'templates/nextjs-tailwind-template'),
+    'Next.js (Tailwind) Typescript': path.resolve(__dirname, 'templates/nextjs-js-template-ts'),
   };
 
   // Get the selected template path
